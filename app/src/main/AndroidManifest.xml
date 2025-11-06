@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".AppContext"
         android:allowBackup="true"
         android:label="VoiceCalc"
         android:theme="@style/Theme.VoiceCalc">

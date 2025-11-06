@@ -70,14 +70,12 @@ class LLMService {
          * Parse response: prefer {result, explanation} JSON; fallback to extracting first number + explanation.
          */
         fun parseLLMResponse(response: String): Pair<String, String> {
-            // try JSON parse
             try {
                 val obj = JSONObject(response)
                 val result = if (obj.has("result")) obj.optString("result") else ""
                 val explanation = obj.optString("explanation", "")
-                    if (result.isNotBlank()) return Pair(result, explanation)
-                } catch (_: Exception) {}
-            }
+                if (result.isNotBlank()) return Pair(result, explanation)
+            } catch (_: Exception) {}
             // fallback: extract first numeric value as result
             val num = Regex("(-?[0-9]+(?:\\.[0-9]+)?)").find(response)?.value ?: ""
             return Pair(if (num.isBlank()) "?" else num, response.replace("\\s+".toRegex()," ").trim())

@@ -136,25 +136,29 @@ fun VoiceCalcApp() {
             Row {
                 Button(onClick = {
                     // compute: route to local simple eval or Gemini
-                    scope.launch {
+                    scope.launch(Dispatchers.IO) {
                         val parser = MathParser
                         if (parser.isSimpleExpression(inputText)) {
                             val simple = parser.normalizeForLocalEval(inputText)
-                            parsedExpression = simple
-                            val res = ExpressionEvaluator().evaluate(simple)
-                            resultText = res
-                            explanationText = "Evaluated locally (simple expression)."
+                            withContext(Dispatchers.Main) {
+                                parsedExpression = simple
+                                val res = ExpressionEvaluator().evaluate(simple)
+                                resultText = res
+                                explanationText = "Evaluated locally (simple expression)."
+                            }
                         } else {
-                            // call Gemini LLM
-                            resultText = "Thinking..."
-                            explanationText = ""
+                            withContext(Dispatchers.Main) {
+                                resultText = "Thinking..."
+                                explanationText = ""
+                            }
                             val prompt = buildLLMPromptForCompute(inputText)
                             val raw = LLMService().ask(prompt, useOpenAI = false)
                             val (res, expl) = LLMService.parseLLMResponse(raw)
-                            resultText = res
-                            explanationText = expl
-                            parsedExpression = "(parsed by LLM)"
-                            // Save to history (if DB later)
+                            withContext(Dispatchers.Main) {
+                                resultText = res
+                                explanationText = expl
+                                parsedExpression = "(parsed by LLM)"
+                            }
                         }
                     }
                 }) {
